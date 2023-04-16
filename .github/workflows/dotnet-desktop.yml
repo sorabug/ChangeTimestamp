@@ -27,4 +27,4 @@ jobs:
       run: nuget restore ChangeTimestamp\ChangeTimestamp.sln
       
     - name: Build solution
-      run: msbuild.exe ChangeTimestamp.sln /t:Build /p:Configuration=${{ matrix.configuration }}
+      run: msbuild.exe ChangeTimestamp\ChangeTimestamp.sln /t:Build /p:Configuration=${{ matrix.configuration }}
