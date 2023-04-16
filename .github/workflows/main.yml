@@ -25,10 +25,18 @@ jobs:
 
     - name: Install NuGet Packages
       run: nuget restore ChangeTimestamp\ChangeTimestamp.sln
-
+      
     - name: Build solution
-      run: msbuild -nologo -v:m -p:Configuration=${{ matrix.configuration }} -p:OutputType=Exe ChangeTimestamp\ChangeTimestamp.sln
-
+      run: msbuild -nologo -v:m -p:Configuration=${{ matrix.configuration }} ChangeTimestamp\ChangeTimestamp.sln
+      
+    - name: Install 7Zip PowerShell Module
+      shell: powershell
+      run: Install-Module 7Zip4PowerShell -Force -Verbose
+      
+    - name: Build Artifact
+      shell: powershell
+      run: Compress-7Zip "ChangeTimestamp\bin\Release" -ArchiveFileName "ChangeTimestamp.zip" -Format Zip
+      
     - name: Delete-tag-and-release
       uses: dev-drprasad/delete-tag-and-release@v0.2.1
       with:
@@ -45,6 +53,7 @@ jobs:
       with:
         tag_name: AutoBuild-Controler
         release_name: AutoBuild-Controler
+        body: ${{ steps.changelog.outputs.changelog }}
         draft: false
         prerelease: true
         
@@ -55,6 +64,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./ChangeTimestamp/bin/Release/ChangeTimestamp.exe
-        asset_name: ChangeTimestamp.exe
-        asset_content_type: application/x-msdownload
+        asset_path: ./ChangeTimestamp.zip
+        asset_name: ChangeTimestamp.zip
+        asset_content_type: application/zip
