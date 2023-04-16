@@ -15,19 +15,24 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-      
+      with:
+        path: YourSolutionDirectory # 修改为实际的解决方案所在目录
+
     - name: Use .NET Framework version 4.0
       uses: microsoft/setup-msbuild@v1.0.2
       with:
         dotnet-version: '4.0'
 
     - name: Restore NuGet packages
+      working-directory: YourSolutionDirectory # 修改为实际的解决方案所在目录
       run: nuget restore YourSolution.sln
 
     - name: Build solution
+      working-directory: YourSolutionDirectory # 修改为实际的解决方案所在目录
       run: msbuild.exe YourSolution.sln /t:Build /p:Configuration=Release
 
     - name: Run tests
+      working-directory: YourTestProjectDirectory # 修改为实际的测试项目所在目录
       run: vstest.console.exe YourTestProject.dll /Logger:trx
 
     - name: Archive artifacts
@@ -35,5 +40,5 @@ jobs:
       with:
         name: Artifacts
         path: |
-          YourSolution/bin/Release/*
-          YourTestProject/TestResults/*.trx
+          YourSolutionDirectory/bin/Release/*
+          YourTestProjectDirectory/TestResults/*.trx
