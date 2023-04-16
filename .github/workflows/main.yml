@@ -2,56 +2,68 @@ name: Build ChangeTimestamp
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   build:
-    runs-on: windows-latest
     strategy:
       matrix:
         configuration: [Release]
+
+    runs-on: windows-2019
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.0.2
-      - name: Install NuGet Packages
-        run: nuget restore ChangeTimestamp/ChangeTimestamp.sln
-      - name: Install 7Zip PowerShell Module
-        shell: powershell
-        run: Install-Module -Name 7Zip4Powershell -Force -Verbose
-      - name: Build Artifact
-        shell: powershell
-        run: Compress-7Zip -Path "ChangeTimestamp\bin\Release" -ArchiveFileName "ChangeTimestamp.zip" -Format Zip
-      - name: Delete Tag and Release
-        uses: dev-drprasad/delete-tag-and-release@v0.2.1
-        with:
-          delete_release: true
-          tag_name: AutoBuild-Controler
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: AutoBuild-Controler
-          release_name: AutoBuild-Controler
-          body: ${{ steps.changelog.outputs.changelog }}
-          draft: false
-          prerelease: true
-      - name: Upload Release Asset
-        id: upload-release-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./ChangeTimestamp.zip
-          asset_name: ChangeTimestamp.zip
-          asset_content_type: application/zip
+    - name: Checkout
+      uses: actions/checkout@main
+      with:
+        fetch-depth: 0
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Install NuGet Packages
+      run: nuget restore ChangeTimestamp\ChangeTimestamp.sln
+      
+    - name: Build solution
+      run: msbuild -nologo -v:m -p:Configuration=${{ matrix.configuration }} ChangeTimestamp\ChangeTimestamp.sln
+      
+    - name: Install 7Zip PowerShell Module
+      shell: powershell
+      run: Install-Module 7Zip4PowerShell -Force -Verbose
+      
+    - name: Build Artifact
+      shell: powershell
+      run: Compress-7Zip "ChangeTimestamp\bin\Release" -ArchiveFileName "ChangeTimestamp.zip" -Format Zip
+      
+    - name: Delete-tag-and-release
+      uses: dev-drprasad/delete-tag-and-release@v0.2.1
+      with:
+        delete_release: true
+        tag_name: AutoBuild-Controler
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: AutoBuild-Controler
+        release_name: AutoBuild-Controler
+        body: ${{ steps.changelog.outputs.changelog }}
+        draft: false
+        prerelease: true
+        
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./ChangeTimestamp.zip
+        asset_name: ChangeTimestamp.zip
+        asset_content_type: application/zip
