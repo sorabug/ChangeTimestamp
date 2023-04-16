@@ -3,6 +3,8 @@ name: Build ChangeTimestamp
 on:
   push:
     branches: [main]
+    tags:
+      - "*"
   pull_request:
     branches: [main]
 
@@ -28,7 +30,26 @@ jobs:
       
     - name: Build solution
       run: msbuild.exe ChangeTimestamp\ChangeTimestamp.sln /t:Build /p:Configuration=${{ matrix.configuration }}
-
+      
+    - name: Publish to release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: This is an automated release.
+        draft: false
+        prerelease: false
+        
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/ChangeTimestamp.exe
+        asset_name: ChangeTimestamp.exe
+        asset_content_type: application/octet-stream
+        
     - name: Create NuGet package
       run: nuget pack ChangeTimestamp\ChangeTimestamp.csproj -Properties Configuration=${{ matrix.configuration }} -OutputDirectory ./nuget
       
