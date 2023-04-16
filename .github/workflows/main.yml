@@ -26,9 +26,6 @@ jobs:
     - name: Install NuGet Packages
       run: nuget restore ChangeTimestamp\ChangeTimestamp.sln
       
-    - name: Build solution for ChangeTimestamp project
-      run: msbuild -nologo -v:m -p:Configuration=${{ matrix.configuration }} ChangeTimestamp\ChangeTimestamp.csproj
-      
     - name: Install 7Zip PowerShell Module
       shell: powershell
       run: Install-Module 7Zip4PowerShell -Force -Verbose
