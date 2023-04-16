@@ -1,4 +1,4 @@
-name: .NET 4.0 Build
+name: Build and Test
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       
-    - name: Setup .NET Framework
+    - name: Use .NET Framework version 4.0
       uses: microsoft/setup-msbuild@v1.0.2
       with:
         dotnet-version: '4.0'
@@ -26,3 +26,14 @@ jobs:
 
     - name: Build solution
       run: msbuild.exe YourSolution.sln /t:Build /p:Configuration=Release
+
+    - name: Run tests
+      run: vstest.console.exe YourTestProject.dll /Logger:trx
+
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: Artifacts
+        path: |
+          YourSolution/bin/Release/*
+          YourTestProject/TestResults/*.trx
