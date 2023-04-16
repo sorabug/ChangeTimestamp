@@ -25,12 +25,6 @@ jobs:
 
     - name: Install NuGet Packages
       run: nuget restore ChangeTimestamp\ChangeTimestamp.sln
-
-    - name: Build solution for .NET Framework 3.5
-      run: msbuild -nologo -v:m -p:Configuration=${{ matrix.configuration }} Client\Client35.csproj
-
-    - name: Build solution for .NET Framework 4.0
-      run: msbuild -nologo -v:m -p:Configuration=${{ matrix.configuration }} Client\Client40.csproj
       
     - name: Build solution for ChangeTimestamp project
       run: msbuild -nologo -v:m -p:Configuration=${{ matrix.configuration }} ChangeTimestamp\ChangeTimestamp.csproj
