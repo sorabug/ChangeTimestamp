@@ -31,15 +31,6 @@ jobs:
     # Build solution
     - name: Build solution
       run: msbuild.exe ChangeTimestamp.sln /t:Build /p:Configuration=${{ matrix.configuration }}
-        
-    # Delete-tag-and-release
-    - name: Delete-tag-and-release
-      uses: dev-drprasad/delete-tag-and-release@main
-      with:
-        delete_release: true # default: false
-        tag_name: AutoBuild # tag name to delete
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
         
     # Upload Release Asset
