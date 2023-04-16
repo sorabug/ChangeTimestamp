@@ -1,0 +1,28 @@
+name: .NET 4.0 Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Setup .NET Framework
+      uses: microsoft/setup-msbuild@v1.0.2
+      with:
+        dotnet-version: '4.0'
+
+    - name: Restore NuGet packages
+      run: nuget restore YourSolution.sln
+
+    - name: Build solution
+      run: msbuild.exe YourSolution.sln /t:Build /p:Configuration=Release
