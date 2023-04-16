@@ -24,7 +24,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
 
     - name: Install NuGet Packages
-      run: nuget restore ChangeTimestamp-CS.sln
+      run: nuget restore ChangeTimestamp.sln
 
     - name: Build solution for .NET Framework 3.5
       run: msbuild -nologo -v:m -p:Configuration=${{ matrix.configuration }} Client\Client35.csproj
