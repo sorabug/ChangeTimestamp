@@ -1,4 +1,4 @@
-name: ChangeTimestamp
+name: Build ChangeTimestamp
 
 on:
   push:
@@ -24,16 +24,17 @@ jobs:
         dotnet-version: '4.0'
         
     - name: Restore NuGet packages
-      run: nuget restore ChangeTimestamp.sln
+      run: nuget restore ChangeTimestamp\ChangeTimestamp.sln
       
     - name: Build solution
-      run: msbuild.exe ChangeTimestamp.sln /t:Build /p:Configuration=${{ matrix.configuration }}
+      run: msbuild.exe ChangeTimestamp\ChangeTimestamp.sln /t:Build /p:Configuration=${{ matrix.configuration }}
+
+    - name: Create NuGet package
+      run: nuget pack ChangeTimestamp\ChangeTimestamp.csproj -Properties Configuration=${{ matrix.configuration }} -OutputDirectory ./nuget
       
-    - name: Publish artifacts to Release branch
-      uses: actions/upload-artifact@v2
+    - name: Publish NuGet package to GitHub Packages
+      uses: nuget/setup-nuget@v1
       with:
-        name: ChangeTimestamp.exe
-        path: ChangeTimestamp/bin/${{ matrix.configuration }}/ChangeTimestamp.exe
-      if: success()
-      env:
-        GITHUB_REF: refs/heads/Release
+        nuget-api-key: ${{ secrets.GITHUB_TOKEN }}
+        nuget-version: ${{ github.ref }}
+      run: nuget push ./nuget/*.nupkg -Source "github"
