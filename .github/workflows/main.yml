@@ -1,0 +1,30 @@
+name: Build ChangeTimestamp
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    strategy:
+      matrix:
+        configuration: [Release]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Use .NET Framework version 4.0
+      uses: microsoft/setup-msbuild@v1.0.2
+      with:
+        dotnet-version: '4.0'
+        
+    - name: Restore NuGet packages
+      run: nuget restore ChangeTimestamp.sln
+      
+    - name: Build solution
+      run: msbuild.exe ChangeTimestamp.sln /t:Build /p:Configuration=${{ matrix.configuration }}
