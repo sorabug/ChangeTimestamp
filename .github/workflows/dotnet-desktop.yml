@@ -34,7 +34,7 @@ jobs:
         
     # Delete-tag-and-release
     - name: Delete-tag-and-release
-      uses: dev-drprasad/delete-tag-and-release@v0.4.0
+      uses: dev-drprasad/delete-tag-and-release@main
       with:
         delete_release: true # default: false
         tag_name: AutoBuild # tag name to delete
