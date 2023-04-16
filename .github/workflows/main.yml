@@ -1,0 +1,39 @@
+name: ChangeTimestamp
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-2019
+    
+    strategy:
+      matrix:
+        configuration: [Release]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Use .NET Framework version 4.0
+      uses: microsoft/setup-msbuild@v1.0.2
+      with:
+        dotnet-version: '4.0'
+        
+    - name: Restore NuGet packages
+      run: nuget restore ChangeTimestamp.sln
+      
+    - name: Build solution
+      run: msbuild.exe ChangeTimestamp.sln /t:Build /p:Configuration=${{ matrix.configuration }}
+      
+    - name: Publish artifacts to Release branch
+      uses: actions/upload-artifact@v2
+      with:
+        name: ChangeTimestamp.exe
+        path: ChangeTimestamp/bin/${{ matrix.configuration }}/ChangeTimestamp.exe
+      if: success()
+      env:
+        GITHUB_REF: refs/heads/Release
