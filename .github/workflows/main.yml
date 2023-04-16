@@ -35,7 +35,7 @@ jobs:
       
     - name: Build Artifact
       shell: powershell
-      run: Compress-7Zip "ChangeTimestamp\bin\Release" -ArchiveFileName "ChangeTimestamp.zip" -Format Zip
+      run: Compress-7Zip "ChangeTimestamp\ChangeTimestamp\bin\Release" -ArchiveFileName "ChangeTimestamp.zip" -Format Zip
       
     - name: Delete-tag-and-release
       uses: dev-drprasad/delete-tag-and-release@v0.2.1
