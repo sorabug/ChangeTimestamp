@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2019
     
     strategy:
       matrix:
@@ -24,7 +24,7 @@ jobs:
         dotnet-version: '4.0'
         
     - name: Restore NuGet packages
-      run: nuget restore ChangeTimestamp.sln
+      run: nuget restore ChangeTimestamp\ChangeTimestamp.sln
       
     - name: Build solution
-      run: msbuild.exe ChangeTimestamp.sln /t:Build /p:Configuration=${{ matrix.configuration }}
+      run: msbuild.exe ChangeTimestamp\ChangeTimestamp.sln /t:Build /p:Configuration=${{ matrix.configuration }}
