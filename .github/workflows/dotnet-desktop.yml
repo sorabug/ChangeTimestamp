@@ -1,44 +1,67 @@
-name: Build and Test
+name: Build ChangeTimestamp
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build:
+    strategy:
+      matrix:
+        configuration: [Release]
+
     runs-on: windows-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v2
-      with:
-        path: ChangeTimestamp # 修改为实际的解决方案所在目录
-
+      
+    # Install the .NET Framework version 4.0
     - name: Use .NET Framework version 4.0
       uses: microsoft/setup-msbuild@v1.0.2
       with:
         dotnet-version: '4.0'
 
-    - name: Restore NuGet packages
-      working-directory: ChangeTimestamp # 修改为实际的解决方案所在目录
+    # Install NuGet packages
+    - name: Install NuGet Packages
       run: nuget restore ChangeTimestamp.sln
 
+    # Build solution
     - name: Build solution
-      working-directory: ChangeTimestamp # 修改为实际的解决方案所在目录
-      run: msbuild.exe ChangeTimestamp.sln /t:Build /p:Configuration=Release
-
-    - name: Run tests
-      working-directory: ChangeTimestamp/TestProject # 修改为实际的测试项目所在目录
-      run: vstest.console.exe YourTestProject.dll /Logger:trx
-
-    - name: Archive artifacts
-      uses: actions/upload-artifact@v2
+      run: msbuild.exe ChangeTimestamp.sln /t:Build /p:Configuration=${{ matrix.configuration }}
+        
+    # Delete-tag-and-release
+    - name: Delete-tag-and-release
+      uses: dev-drprasad/delete-tag-and-release@v0.2.0
       with:
-        name: Artifacts
-        path: |
-          ChangeTimestamp/bin/Release/*
-          ChangeTimestamp/TestProject/TestResults/*.trx
+        delete_release: true # default: false
+        tag_name: AutoBuild # tag name to delete
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    # Create Release
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.6
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: AutoBuild
+        release_name: AutoBuild
+        body: ${{ steps.changelog.outputs.changelog }}
+        draft: false
+        prerelease: true
+        
+    # Upload Release Asset
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./ChangeTimestamp/bin/Release/ChangeTimestamp.exe
+        asset_name: ChangeTimestamp.exe
+        asset_content_type: application/octet-stream
